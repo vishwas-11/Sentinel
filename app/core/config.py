@@ -14,6 +14,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         extra="ignore",
+        populate_by_name=True,
     )
 
     # Runtime Environment
@@ -28,10 +29,19 @@ class Settings(BaseSettings):
         description="Log output severity threshold",
     )
 
-    # Target Adapter Defaults
+    # Target Adapter Configuration
+    target_base_url: str = Field(
+        default="http://localhost:8001",
+        alias="sentinel_target_url",
+        description="Base URL of target application (defaults to reference-target at port 8001)",
+    )
     target_timeout_seconds: float = Field(
         default=30.0,
-        description="Default timeout in seconds for target HTTP adapter calls",
+        description="Default total timeout in seconds for target HTTP adapter calls",
+    )
+    target_connect_timeout_seconds: float = Field(
+        default=5.0,
+        description="Connect timeout in seconds for establishing connection to target",
     )
 
 
