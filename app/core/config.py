@@ -44,6 +44,17 @@ class Settings(BaseSettings):
         description="Connect timeout in seconds for establishing connection to target",
     )
 
+    # Runner Orchestration Configuration
+    runner_max_concurrency: int = Field(
+        default=1,
+        ge=1,
+        description="Default concurrency limit for attack execution (1 = sequential)",
+    )
+    runner_reset_policy: str = Field(
+        default="per_run",
+        description="Default target reset policy: 'per_run', 'per_attack', or 'never'",
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:
