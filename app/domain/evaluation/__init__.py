@@ -1,6 +1,7 @@
 from app.domain.evaluation.base import Evaluator
 from app.domain.evaluation.composite import CompositeEvaluator, CompositePolicy
 from app.domain.evaluation.exact import ExactMatchEvaluator
+from app.domain.evaluation.judge import JudgeOutputSchema, SemanticJudge
 from app.domain.evaluation.models import (
     EvaluationResult,
     JudgeVerdict,
@@ -16,8 +17,10 @@ __all__ = [
     "Evaluator",
     "EvaluationResult",
     "ExactMatchEvaluator",
+    "JudgeOutputSchema",
     "JudgeVerdict",
     "RegexEvaluator",
+    "SemanticJudge",
     "TestExecutionRecord",
     "ToolCallEvaluator",
     "VerdictOutcome",

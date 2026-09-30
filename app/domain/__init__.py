@@ -12,10 +12,22 @@ from app.domain.attacks import (
     ThreatCategory,
 )
 from app.domain.evaluation import (
+    CompositeEvaluator,
+    CompositePolicy,
     EvaluationResult,
+    Evaluator,
+    ExactMatchEvaluator,
+    JudgeOutputSchema,
     JudgeVerdict,
+    RegexEvaluator,
+    SemanticJudge,
     TestExecutionRecord,
+    ToolCallEvaluator,
     VerdictOutcome,
+)
+from app.domain.llm import (
+    LLMProvider,
+    LLMResponse,
 )
 from app.domain.scoring import (
     ScoringResult,
@@ -28,16 +40,26 @@ from app.domain.targets import (
 
 __all__ = [
     "AttackPayload",
+    "CompositeEvaluator",
+    "CompositePolicy",
     "EvaluationResult",
+    "Evaluator",
+    "ExactMatchEvaluator",
+    "JudgeOutputSchema",
     "JudgeVerdict",
+    "LLMProvider",
+    "LLMResponse",
     "MutationMetadata",
     "ObservableToolCall",
+    "RegexEvaluator",
     "ScoringResult",
+    "SemanticJudge",
     "Severity",
     "TargetAdapter",
     "TargetResult",
     "TestCase",
     "TestExecutionRecord",
     "ThreatCategory",
+    "ToolCallEvaluator",
     "VerdictOutcome",
 ]
