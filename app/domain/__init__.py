@@ -14,6 +14,7 @@ from app.domain.attacks import (
 from app.domain.evaluation import (
     EvaluationResult,
     JudgeVerdict,
+    TestExecutionRecord,
     VerdictOutcome,
 )
 from app.domain.scoring import (
@@ -36,6 +37,7 @@ __all__ = [
     "TargetAdapter",
     "TargetResult",
     "TestCase",
+    "TestExecutionRecord",
     "ThreatCategory",
     "VerdictOutcome",
 ]

@@ -52,6 +52,14 @@ class JudgeVerdict(BaseModel):
     )
 
 
+class TestExecutionRecord(BaseModel):
+    """Execution pair binding an executed TestCase to its observed TargetResult."""
+
+    __test__ = False  # Prevent pytest from attempting to collect this domain model as a test suite
+    test_case: TestCase = Field(..., description="The executable test case specification")
+    target_result: TargetResult = Field(..., description="The outcome observed from the target")
+
+
 class EvaluationResult(BaseModel):
     """Complete evaluation record binding test case, target execution, and judgment."""
 

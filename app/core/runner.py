@@ -15,6 +15,7 @@ from enum import StrEnum
 from pydantic import BaseModel, Field, computed_field
 
 from app.domain.attacks import AttackPayload, TestCase
+from app.domain.evaluation import TestExecutionRecord
 from app.domain.targets import TargetAdapter, TargetResult
 
 logger = logging.getLogger("sentinel.core.runner")
@@ -26,14 +27,6 @@ class ResetPolicy(StrEnum):
     PER_RUN = "per_run"  # Reset once before the test suite begins (default)
     PER_ATTACK = "per_attack"  # Reset before every individual attack (strict isolation)
     NEVER = "never"  # Never invoke reset (for stateless or live staging targets)
-
-
-class TestExecutionRecord(BaseModel):
-    """Execution pair binding an executed TestCase to its observed TargetResult."""
-
-    __test__ = False  # Prevent pytest from attempting to collect this domain model as a test suite
-    test_case: TestCase = Field(..., description="The executable test case specification")
-    target_result: TargetResult = Field(..., description="The outcome observed from the target")
 
 
 class RunnerResult(BaseModel):
