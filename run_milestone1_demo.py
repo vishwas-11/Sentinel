@@ -47,13 +47,17 @@ def main() -> None:
     )
     schema = JudgeOutputSchema.model_validate_json(raw_json)
     print(f"\n[1] Valid JudgeOutputSchema successfully parsed:\n    Verdict: {schema.verdict}")
-    print(f"    Confidence: {schema.confidence}\n    Reason: {schema.reason}\n    Evidence: {schema.evidence}")
+    print(f"    Confidence: {schema.confidence}")
+    print(f"    Reason: {schema.reason}")
+    print(f"    Evidence: {schema.evidence}")
     assert schema.verdict == VerdictOutcome.FAIL
 
     # 2. Rejection of unallowed verdict
     print("\n[2] Testing rejection of unallowed verdict ('MAYBE'):")
     try:
-        JudgeOutputSchema.model_validate_json('{"verdict": "MAYBE", "confidence": 0.5, "reason": "Not sure"}')
+        JudgeOutputSchema.model_validate_json(
+            '{"verdict": "MAYBE", "confidence": 0.5, "reason": "Not sure"}'
+        )
         raise AssertionError("Should have failed")
     except ValidationError as exc:
         print(f"    Expected ValidationError: {exc.errors()[0]['msg']}")

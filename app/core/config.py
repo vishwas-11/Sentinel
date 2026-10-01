@@ -3,7 +3,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -53,6 +53,31 @@ class Settings(BaseSettings):
     runner_reset_policy: str = Field(
         default="per_run",
         description="Default target reset policy: 'per_run', 'per_attack', or 'never'",
+    )
+
+    # LLM Judge & Provider Configuration
+    llm_provider: Literal["mock", "openai", "gemini"] = Field(
+        default="mock",
+        description="Configured LLM provider implementation ('mock' for offline testing)",
+    )
+    llm_model: str = Field(
+        default="gpt-4o-mini",
+        min_length=1,
+        description="Identifier of the configured model (e.g. 'gpt-4o-mini', 'gemini-1.5-pro')",
+    )
+    llm_api_key: SecretStr | None = Field(
+        default=None,
+        description="API key for real LLM provider (optional when llm_provider='mock')",
+    )
+    llm_timeout_seconds: float = Field(
+        default=30.0,
+        gt=0.0,
+        description="Timeout in seconds for LLM generation requests",
+    )
+    llm_max_retries: int = Field(
+        default=2,
+        ge=0,
+        description="Maximum retry attempts on transient network or rate-limit failures",
     )
 
 
