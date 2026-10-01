@@ -1,7 +1,6 @@
 """Educational manual verification script for Phase 7 Milestone 2 configuration."""
 
 from pydantic import SecretStr, ValidationError
-import pytest
 
 from app.core.config import Settings
 
@@ -35,7 +34,8 @@ def main() -> None:
     print(f"    str(settings.llm_api_key):          {str(configured_settings.llm_api_key)}")
     print(f"    repr(settings.llm_api_key):         {repr(configured_settings.llm_api_key)}")
     print(f"    repr(settings) snippet:             ...{repr(configured_settings)[-90:]}")
-    print(f"    Explicit .get_secret_value():       {configured_settings.llm_api_key.get_secret_value()}")
+    raw_secret = configured_settings.llm_api_key.get_secret_value()
+    print(f"    Explicit .get_secret_value():       {raw_secret}")
     assert "sk-prod-super-secret-key" not in str(configured_settings.llm_api_key)
     assert "sk-prod-super-secret-key" not in repr(configured_settings)
     assert configured_settings.llm_api_key.get_secret_value() == "sk-prod-super-secret-key-xyz123"
