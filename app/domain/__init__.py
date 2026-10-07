@@ -25,6 +25,14 @@ from app.domain.evaluation import (
     ToolCallEvaluator,
     VerdictOutcome,
 )
+from app.domain.gates import (
+    ComparisonEngine,
+    ComparisonReport,
+    GateFinding,
+    GateResult,
+    SecurityGate,
+    SecurityPolicy,
+)
 from app.domain.llm import (
     LLMProvider,
     LLMResponse,
@@ -40,11 +48,15 @@ from app.domain.targets import (
 
 __all__ = [
     "AttackPayload",
+    "ComparisonEngine",
+    "ComparisonReport",
     "CompositeEvaluator",
     "CompositePolicy",
     "EvaluationResult",
     "Evaluator",
     "ExactMatchEvaluator",
+    "GateFinding",
+    "GateResult",
     "JudgeOutputSchema",
     "JudgeVerdict",
     "LLMProvider",
@@ -53,6 +65,8 @@ __all__ = [
     "ObservableToolCall",
     "RegexEvaluator",
     "ScoringResult",
+    "SecurityGate",
+    "SecurityPolicy",
     "SemanticJudge",
     "Severity",
     "TargetAdapter",
