@@ -80,6 +80,23 @@ class Settings(BaseSettings):
         description="Maximum retry attempts on transient network or rate-limit failures",
     )
 
+    # Mutation Engine Configuration
+    enable_mutations: bool = Field(
+        default=False,
+        alias="sentinel_enable_mutations",
+        description="Whether adversarial payload mutations are enabled by default",
+    )
+    default_mutations_per_attack: int = Field(
+        default=1,
+        ge=1,
+        le=10,
+        description="Default number of mutated variations to generate per seed attack",
+    )
+    default_mutation_strategies: list[str] = Field(
+        default_factory=lambda: ["base64", "delimiter"],
+        description="Default mutation strategies enabled when mutation is active",
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:

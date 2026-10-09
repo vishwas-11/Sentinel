@@ -25,6 +25,14 @@ def handle_scan(args, stdout=sys.stdout, stderr=sys.stderr) -> int:
     concurrency = args.concurrency or settings.runner_max_concurrency
     reset_policy = args.reset_policy or settings.runner_reset_policy
 
+    # Mutation options
+    enable_mutations = args.mutations or settings.enable_mutations
+    mutation_strategies = None
+    if args.mutation_strategies:
+        mutation_strategies = [s.strip() for s in args.mutation_strategies.split(",") if s.strip()]
+    mutations_per_attack = args.mutations_per_attack
+    mutation_seed = args.mutation_seed
+
     service = ScanService(settings=settings)
 
     try:
@@ -36,6 +44,10 @@ def handle_scan(args, stdout=sys.stdout, stderr=sys.stderr) -> int:
                 category=category,
                 concurrency=concurrency,
                 reset_policy=reset_policy,
+                enable_mutations=enable_mutations,
+                mutation_strategies=mutation_strategies,
+                mutations_per_attack=mutations_per_attack,
+                mutation_seed=mutation_seed,
             )
         )
     except Exception as exc:

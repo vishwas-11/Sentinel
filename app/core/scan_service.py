@@ -24,6 +24,7 @@ from app.domain.evaluation import (
     SemanticJudge,
 )
 from app.domain.evaluation.models import EvaluationResult
+from app.domain.mutations import MutationConfig, MutationEngine
 from app.domain.scoring import ScoringEngine, ScoringReport
 from app.domain.targets import TargetAdapter
 from app.infrastructure.llm.factory import create_llm_provider
@@ -70,6 +71,11 @@ class ScanService:
         reset_policy: ResetPolicy | str | None = None,
         evaluators: Sequence[Evaluator] | None = None,
         target_adapter: TargetAdapter | None = None,
+        enable_mutations: bool | None = None,
+        mutation_strategies: Sequence[str] | None = None,
+        mutations_per_attack: int | None = None,
+        mutation_seed: int | None = None,
+        mutation_engine: MutationEngine | None = None,
     ) -> ScoringReport:
         """Execute a complete end-to-end security benchmark scan.
 
@@ -84,6 +90,11 @@ class ScanService:
             reset_policy: Target reset lifecycle policy.
             evaluators: Sequence of evaluators; defaults to standard deterministic evaluators.
             target_adapter: Optional injected target adapter (e.g. for testing or mock targets).
+            enable_mutations: Optional boolean override to enable adversarial payload mutations.
+            mutation_strategies: Optional sequence of mutation strategies to execute.
+            mutations_per_attack: Number of mutated variations to generate per seed attack.
+            mutation_seed: Optional seed for reproducible deterministic mutations.
+            mutation_engine: Optional injected MutationEngine instance.
 
         Returns:
             Authoritative, serializable ScoringReport with scores, ASR, and findings.
@@ -122,6 +133,40 @@ class ScanService:
             logger.warning("No attack definitions discovered to execute.")
             # Calculate empty scoring report
             return self.scoring_engine.calculate([])
+
+        # 2b. Optional adversarial mutation expansion
+        effective_enable_mutations = (
+            enable_mutations if enable_mutations is not None else self.settings.enable_mutations
+        )
+        if effective_enable_mutations:
+            effective_strategies = list(
+                mutation_strategies
+                if mutation_strategies is not None
+                else self.settings.default_mutation_strategies
+            )
+            effective_count = (
+                mutations_per_attack
+                if mutations_per_attack is not None
+                else self.settings.default_mutations_per_attack
+            )
+
+            mut_config = MutationConfig(
+                enabled=True,
+                strategies=effective_strategies,
+                mutations_per_attack=effective_count,
+                seed=mutation_seed,
+            )
+
+            engine = mutation_engine
+            if engine is None:
+                llm_provider = None
+                try:
+                    llm_provider = create_llm_provider(self.settings)
+                except Exception as exc:
+                    logger.debug("LLM provider unavailable for mutations: %s", exc)
+                engine = MutationEngine(provider=llm_provider)
+
+            attacks = await engine.generate_mutations(attacks, config=mut_config)
 
         # 3. Initialize target adapter if not injected
         adapter = target_adapter or HttpTargetAdapter(

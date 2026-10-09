@@ -96,6 +96,10 @@ class ScoringEngine:
         attack_scores: list[AttackScore] = []
         for res in results:
             attack = res.test_case.attack
+            score_metadata = dict(res.verdict.metadata)
+            if res.test_case.mutation is not None:
+                score_metadata["mutation"] = res.test_case.mutation.model_dump()
+                score_metadata["parent_attack_id"] = res.test_case.mutation.parent_attack_id
             score = self.score_attack(
                 attack_id=attack.id,
                 category=attack.category,
@@ -103,7 +107,7 @@ class ScoringEngine:
                 verdict=res.verdict.outcome,
                 reason=res.verdict.reason,
                 evidence=res.verdict.evidence,
-                metadata=res.verdict.metadata,
+                metadata=score_metadata,
             )
             attack_scores.append(score)
         return attack_scores
@@ -128,6 +132,13 @@ class ScoringEngine:
                 attack_scores.append(item)
             elif isinstance(item, EvaluationResult):
                 attack = item.test_case.attack
+                score_metadata = dict(item.verdict.metadata)
+                if item.test_case.mutation is not None:
+                    score_metadata["mutation"] = item.test_case.mutation.model_dump()
+                    score_metadata["parent_attack_id"] = item.test_case.mutation.parent_attack_id
+                elif "mutation" in attack.metadata:
+                    score_metadata["mutation"] = attack.metadata["mutation"]
+                    score_metadata["parent_attack_id"] = attack.metadata.get("parent_attack_id")
                 attack_scores.append(
                     self.score_attack(
                         attack_id=attack.id,
@@ -136,7 +147,7 @@ class ScoringEngine:
                         verdict=item.verdict.outcome,
                         reason=item.verdict.reason,
                         evidence=item.verdict.evidence,
-                        metadata=item.verdict.metadata,
+                        metadata=score_metadata,
                     )
                 )
 

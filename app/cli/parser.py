@@ -71,6 +71,33 @@ def create_parser() -> argparse.ArgumentParser:
         help="Target reset policy (default: per_run)",
     )
     scan_parser.add_argument(
+        "--mutations",
+        action="store_true",
+        default=False,
+        help="Enable adversarial payload mutations to expand benchmark test coverage",
+    )
+    scan_parser.add_argument(
+        "--mutation-strategies",
+        type=str,
+        default=None,
+        help=(
+            "Comma-separated list of mutation strategies to execute "
+            "(choices: base64, delimiter, paraphrase, multilingual)"
+        ),
+    )
+    scan_parser.add_argument(
+        "--mutations-per-attack",
+        type=int,
+        default=None,
+        help="Number of mutated variations to generate per seed attack (default: 1)",
+    )
+    scan_parser.add_argument(
+        "--mutation-seed",
+        type=int,
+        default=None,
+        help="Random seed for reproducible deterministic mutations",
+    )
+    scan_parser.add_argument(
         "-o",
         "--output",
         type=str,

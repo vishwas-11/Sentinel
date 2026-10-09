@@ -88,6 +88,28 @@ def test_parser_scan_valid_arguments() -> None:
     assert args.format == "json"
 
 
+def test_parser_scan_mutation_arguments() -> None:
+    """Test parser parses scan mutation flags and parameters."""
+    parser = create_parser()
+    args = parser.parse_args(
+        [
+            "scan",
+            "--mutations",
+            "--mutation-strategies",
+            "base64,delimiter",
+            "--mutations-per-attack",
+            "2",
+            "--mutation-seed",
+            "42",
+        ]
+    )
+    assert args.command == "scan"
+    assert args.mutations is True
+    assert args.mutation_strategies == "base64,delimiter"
+    assert args.mutations_per_attack == 2
+    assert args.mutation_seed == 42
+
+
 def test_parser_gate_valid_arguments() -> None:
     """Test parser parses gate arguments with policy overrides."""
     parser = create_parser()

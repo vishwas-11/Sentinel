@@ -14,7 +14,7 @@ from enum import StrEnum
 
 from pydantic import BaseModel, Field, computed_field
 
-from app.domain.attacks import AttackPayload, TestCase
+from app.domain.attacks import AttackPayload, MutationMetadata, TestCase
 from app.domain.evaluation import TestExecutionRecord
 from app.domain.targets import TargetAdapter, TargetResult
 
@@ -98,10 +98,22 @@ class AttackRunner:
         session_id = f"sentinel_{run_id}_{attack.id}"
         test_case_id = f"tc_{run_id}_{attack.id}"
 
+        mutation_meta = None
+        if "mutation" in attack.metadata:
+            raw_mut = attack.metadata["mutation"]
+            if isinstance(raw_mut, MutationMetadata):
+                mutation_meta = raw_mut
+            elif isinstance(raw_mut, dict):
+                try:
+                    mutation_meta = MutationMetadata.model_validate(raw_mut)
+                except Exception:
+                    mutation_meta = None
+
         return TestCase(
             id=test_case_id,
             attack=attack,
             session_id=session_id,
+            mutation=mutation_meta,
             metadata={"run_id": run_id},
         )
 
