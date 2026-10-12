@@ -115,11 +115,13 @@ class ScoringEngine:
     def calculate(
         self,
         items: Sequence[EvaluationResult | AttackScore],
+        scan_id: str | None = None,
     ) -> ScoringReport:
         """Compute the full deterministic ScoringReport from evaluation results or attack scores.
 
         Args:
             items: Sequence of EvaluationResult or AttackScore instances.
+            scan_id: Optional correlation identifier for the benchmark scan run.
 
         Returns:
             Deterministic ScoringReport containing composite scores, category breakdowns,
@@ -237,6 +239,7 @@ class ScoringEngine:
         )
 
         return ScoringReport(
+            scan_id=scan_id,
             timestamp=datetime.now(UTC),
             total_attacks=total_attacks,
             evaluated_attacks=evaluated_attacks,

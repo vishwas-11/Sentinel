@@ -33,6 +33,8 @@ def handle_scan(args, stdout=sys.stdout, stderr=sys.stderr) -> int:
     mutations_per_attack = args.mutations_per_attack
     mutation_seed = args.mutation_seed
 
+    persist = getattr(args, "persist", False)
+
     service = ScanService(settings=settings)
 
     try:
@@ -48,11 +50,15 @@ def handle_scan(args, stdout=sys.stdout, stderr=sys.stderr) -> int:
                 mutation_strategies=mutation_strategies,
                 mutations_per_attack=mutations_per_attack,
                 mutation_seed=mutation_seed,
+                persist=persist,
             )
         )
     except Exception as exc:
         print(f"Scan execution failed: {exc}", file=stderr)
         return 1
+
+    if persist and report.scan_id and args.format != "json":
+        print(f"Scan persisted to backend. Scan ID: {report.scan_id}", file=stderr)
 
     # Save to file if output path requested
     if args.output:

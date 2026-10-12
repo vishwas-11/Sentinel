@@ -25,9 +25,11 @@ from app.domain.evaluation import (
 )
 from app.domain.evaluation.models import EvaluationResult
 from app.domain.mutations import MutationConfig, MutationEngine
+from app.domain.repositories import PersistenceConfigError, ScanRepository
 from app.domain.scoring import ScoringEngine, ScoringReport
 from app.domain.targets import TargetAdapter
 from app.infrastructure.llm.factory import create_llm_provider
+from app.infrastructure.persistence.factory import create_repositories
 
 logger = logging.getLogger("sentinel.core.scan_service")
 
@@ -76,6 +78,8 @@ class ScanService:
         mutations_per_attack: int | None = None,
         mutation_seed: int | None = None,
         mutation_engine: MutationEngine | None = None,
+        persist: bool | None = None,
+        scan_repository: ScanRepository | None = None,
     ) -> ScoringReport:
         """Execute a complete end-to-end security benchmark scan.
 
@@ -203,7 +207,9 @@ class ScanService:
             evaluation_results.append(eval_res)
 
         # 6. Compute scores and compile final ScoringReport
-        scoring_report = self.scoring_engine.calculate(evaluation_results)
+        scoring_report = self.scoring_engine.calculate(
+            evaluation_results, scan_id=runner_result.run_id
+        )
         logger.info(
             "Scan complete. Evaluated: %d, ASR: %s, Security Score: %s",
             scoring_report.evaluated_attacks,
@@ -214,4 +220,41 @@ class ScanService:
             if scoring_report.security_score is not None
             else "N/A",
         )
+
+        # 7. Optionally persist report
+        effective_persist = (
+            persist
+            if persist is not None
+            else (self.settings.persistence_backend.lower() != "none")
+        )
+        if effective_persist:
+            repo = scan_repository
+            if repo is None:
+                repo, _ = create_repositories(self.settings)
+
+            if repo is None:
+                raise PersistenceConfigError(
+                    "Scan persistence requested, but no persistence backend is configured. "
+                    "Configure PERSISTENCE_BACKEND='memory' or PERSISTENCE_BACKEND='supabase'."
+                )
+
+            mutation_summary = None
+            if effective_enable_mutations:
+                mutation_summary = {
+                    "enabled": True,
+                    "strategies": effective_strategies,
+                    "mutations_per_attack": effective_count,
+                    "seed": mutation_seed,
+                }
+
+            saved_scan_id = await repo.save_scan(
+                report=scoring_report,
+                target_url=effective_url,
+                status="completed",
+                mutation_config=mutation_summary,
+                metadata={"total_duration_ms": runner_result.total_duration_ms},
+            )
+            scoring_report.scan_id = saved_scan_id
+            logger.info("Scan report persisted successfully with ID: %s", saved_scan_id)
+
         return scoring_report

@@ -37,7 +37,7 @@ def test_parser_help_exits_zero() -> None:
 def test_parser_subcommands_help_exit_zero() -> None:
     """Test scan, gate, version --help produce exit code 0."""
     parser = create_parser()
-    for subcmd in ["scan", "gate", "version"]:
+    for subcmd in ["scan", "scans", "baseline", "gate", "version"]:
         try:
             parser.parse_args([subcmd, "--help"])
         except SystemExit as exc:

@@ -109,6 +109,14 @@ class ScoringReport(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    scan_id: str | None = Field(
+        default=None,
+        description="Correlation identifier for this benchmark scan run",
+    )
+    report_schema_version: str = Field(
+        default="1.0.0",
+        description="Schema version of this scoring report",
+    )
     timestamp: datetime = Field(
         default_factory=lambda: datetime.now(UTC),
         description="Timestamp of score generation in UTC",

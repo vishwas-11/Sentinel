@@ -138,3 +138,66 @@ def print_gate_result_text(
     status_label = "[PASSED]" if result.passed else "[FAILED]"
     print(f"FINAL RESULT: {status_label} — {result.summary_message}", file=file)
     print("=" * 65, file=file)
+
+
+def print_scans_list_text(scans: list[dict[str, Any]], file=sys.stdout) -> None:
+    """Format and print list of scan summary records."""
+    print("=" * 75, file=file)
+    print("SENTINEL HISTORICAL SCANS", file=file)
+    print("=" * 75, file=file)
+    if not scans:
+        print("No historical scans found.", file=file)
+        print("=" * 75, file=file)
+        return
+
+    print(
+        f"{'Scan ID':<24} {'Created (UTC)':<20} {'Status':<10} {'Score':<8} {'ASR':<8}",
+        file=file,
+    )
+    print("-" * 75, file=file)
+    for s in scans:
+        scan_id = s.get("id", "N/A")
+        created = s.get("created_at", "")[:19].replace("T", " ")
+        status = s.get("status", "completed")
+        score = f"{s.get('security_score'):.1f}" if s.get("security_score") is not None else "N/A"
+        asr_val = s.get("attack_success_rate")
+        asr = f"{asr_val:.1%}" if asr_val is not None else "N/A"
+        print(f"{scan_id:<24} {created:<20} {status:<10} {score:<8} {asr:<8}", file=file)
+    print("=" * 75, file=file)
+
+
+def print_baselines_list_text(baselines: list[dict[str, Any]], file=sys.stdout) -> None:
+    """Format and print list of named baseline records."""
+    print("=" * 75, file=file)
+    print("SENTINEL NAMED BASELINES", file=file)
+    print("=" * 75, file=file)
+    if not baselines:
+        print("No named baselines found.", file=file)
+        print("=" * 75, file=file)
+        return
+
+    print(
+        f"{'Baseline Name':<22} {'Baseline ID':<22} {'Scan ID':<20} {'Created (UTC)':<12}",
+        file=file,
+    )
+    print("-" * 75, file=file)
+    for b in baselines:
+        name = b.get("name", "N/A")
+        base_id = b.get("id", "N/A")
+        scan_id = b.get("scan_id", "N/A")
+        created = b.get("created_at", "")[:10]
+        print(f"{name:<22} {base_id:<22} {scan_id:<20} {created:<12}", file=file)
+    print("=" * 75, file=file)
+
+
+def print_baseline_record_text(baseline: dict[str, Any], file=sys.stdout) -> None:
+    """Format and print details of an individual baseline record."""
+    print("=" * 65, file=file)
+    print(f"BASELINE: {baseline.get('name')}", file=file)
+    print("=" * 65, file=file)
+    print(f"Baseline ID:     {baseline.get('id')}", file=file)
+    print(f"Origin Scan ID:  {baseline.get('scan_id')}", file=file)
+    print(f"Created (UTC):   {baseline.get('created_at')}", file=file)
+    if baseline.get("description"):
+        print(f"Description:     {baseline.get('description')}", file=file)
+    print("=" * 65, file=file)

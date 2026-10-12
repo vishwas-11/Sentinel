@@ -38,7 +38,38 @@ def handle_gate(args, stdout=sys.stdout, stderr=sys.stderr) -> int:
     """Execute the gate command."""
     # 1. Load baseline and candidate reports
     try:
-        baseline_report = _load_report(args.baseline)
+        baseline_name = getattr(args, "baseline_name", None)
+        baseline_file = getattr(args, "baseline", None)
+
+        if baseline_name:
+            from app.core.config import get_settings
+            from app.infrastructure.persistence.factory import create_repositories
+
+            settings = get_settings()
+            _, baseline_repo = create_repositories(settings)
+            if baseline_repo is None:
+                print(
+                    "Error: No persistence backend configured to resolve baseline name. "
+                    "Set PERSISTENCE_BACKEND='memory' or PERSISTENCE_BACKEND='supabase'.",
+                    file=stderr,
+                )
+                return 1
+
+            import asyncio
+
+            baseline_report = asyncio.run(baseline_repo.get_baseline_report(baseline_name))
+            if baseline_report is None:
+                print(f"Error: Baseline '{baseline_name}' not found in repository.", file=stderr)
+                return 1
+        elif baseline_file:
+            baseline_report = _load_report(baseline_file)
+        else:
+            print(
+                "Error: Must provide either --baseline <file_path> or --baseline-name <name>.",
+                file=stderr,
+            )
+            return 1
+
         candidate_report = _load_report(args.candidate)
     except Exception as exc:
         print(f"Error loading reports: {exc}", file=stderr)

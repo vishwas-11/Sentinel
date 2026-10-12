@@ -97,6 +97,26 @@ class Settings(BaseSettings):
         description="Default mutation strategies enabled when mutation is active",
     )
 
+    # Persistence Configuration (Supabase / PostgreSQL)
+    persistence_backend: Literal["none", "memory", "supabase"] = Field(
+        default="none",
+        alias="sentinel_persistence_backend",
+        description="Persistence backend: 'none', 'memory', or 'supabase'",
+    )
+    supabase_url: str | None = Field(
+        default=None,
+        description="Base URL of Supabase project (e.g. https://xyz.supabase.co)",
+    )
+    supabase_key: SecretStr | None = Field(
+        default=None,
+        description="Supabase service role or anon API key for PostgREST calls",
+    )
+    persistence_timeout_seconds: float = Field(
+        default=15.0,
+        gt=0.0,
+        description="Timeout in seconds for persistence HTTP requests",
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:
